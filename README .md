@@ -27,8 +27,8 @@
 ## 🔧 Quick Start
 ```bash
 # 1  Clone
- git clone https://github.com/<your‑handle>/prescription-ocr.git
- cd prescription-ocr
+ git clone https://github.com/JonSnow1807/Medical-Prescription-OCR.git
+ cd Medical-Prescription-OCR
 
 # 2  Install deps (virtualenv recommended)
  pip install torch torchvision torchaudio pytorch-lightning              transformers sentencepiece Pillow albumentations[imgaug]
@@ -88,6 +88,6 @@
 ---
 
 ## 🙋‍♂️ Author
-Chinmay Shrivastava – B.Tech CSE, self‑taught ML engineer passionate about healthcare AI.
+Chinmay Shrivastava – MS CSE, self‑taught ML engineer passionate about AI.
 
 > *Feel free to create an issue or submit a PR if you’d like to contribute!*
