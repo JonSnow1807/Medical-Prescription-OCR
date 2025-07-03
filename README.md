@@ -1,93 +1,121 @@
-# Handwritten Medical Prescription OCR
+from transformers import DonutProcessor, VisionEncoderDecoderModel
+from PIL import Image
+import torch
 
-**Handwritten Medical Prescription OCR** (internal codename **RxReader**) is a transformer‑based Optical Character Recognition (OCR) system that turns doctors’ handwritten prescriptions into clean, structured text. It is built with **PyTorch Lightning** and **NAVER Clova Donut** and includes a full training pipeline, gradual augmentations, and detailed evaluation metrics.
+# Load model and processor
+processor = DonutProcessor.from_pretrained("chinmays18/medical-prescription-ocr")
+model = VisionEncoderDecoderModel.from_pretrained("chinmays18/medical-prescription-ocr")
 
----
+# Setup device
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
 
-## 🚀 Overview
+# Process an image
+image = Image.open("prescription.jpg").convert("RGB")
+pixel_values = processor(images=image, return_tensors="pt").pixel_values.to(device)
 
-| | |
-|---|---|
-| **Goal** | Accurately transcribe drug name, dosage, frequency, and instructions from prescription images and return JSON. |
-| **Model** | VisionEncoderDecoderModel (Donut) fine‑tuned on a curated prescription dataset. |
-| **Workflow** | 1. **Data** in train/val/test folders with JSON annotations  2. **Augmentations**: basic early → advanced later  3. **Training** automated by PyTorch Lightning  4. **Evaluation**: character‑ and word‑level accuracy. |
+# Generate text
+task_prompt = "<s_ocr>"
+decoder_input_ids = processor.tokenizer(task_prompt, return_tensors="pt").input_ids.to(device)
 
----
+generated_ids = model.generate(
+    pixel_values,
+    decoder_input_ids=decoder_input_ids,
+    max_length=512,
+    num_beams=1,
+    early_stopping=True
+)
 
-## 🛠️ Tech Stack
-* **Python 3.8+**  
-* **PyTorch & PyTorch Lightning** – core DL & training loop  
-* **Hugging Face Transformers** – Donut model & processor  
-* **Albumentations** – fast, rich image augmentation  
-* **SentencePiece** – sub‑word tokenizer for Donut  
-* **TQDM, NumPy, Pillow** – utilities & image I/O
+# Decode output
+prescription_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+print(prescription_text)
 
----
+Advanced Usage with Classification
+python# The app.py includes zero-shot classification to verify if an image is a prescription
+# See app.py for complete implementation including confidence scoring
+📚 Dataset
+Our model was trained on a carefully curated dataset of synthetic medical prescriptions:
 
-## 🔧 Quick Start
-```bash
-# 1  Clone
- git clone https://github.com/JonSnow1807/Medical-Prescription-OCR.git
- cd Medical-Prescription-OCR
+Total Samples: 1,000 high-quality images
+Training Set: 800 samples
+Validation Set: 100 samples
+Test Set: 100 samples
+Format: PNG images with JSON annotations
+Annotations: Structured text including doctor info, patient details, medications, and dosages
 
-# 2  Install deps (virtualenv recommended)
- pip install torch torchvision torchaudio pytorch-lightning              transformers sentencepiece Pillow albumentations[imgaug]
+Access the full dataset: chinmays18/medical-prescription-dataset
+Dataset Structure
+prescription_XXXXX.png  → Image file
+prescription_XXXXX.json → Annotation with ground truth text
+🛠️ Training
+The model training pipeline is fully documented in OCR_training.ipynb.
+Training Highlights
 
-# 3  Dataset layout
- data/
-   └── train/
-       ├── images/
-       └── annotations/
-   └── val/
-   └── test/
- train.txt  # list of training image filenames
- val.txt
- test.txt
+Base Model: NAVER Clova Donut (Document Understanding Transformer)
+Training Strategy: Gradual augmentation (basic → advanced)
+Framework: PyTorch Lightning for clean, reproducible training
+Optimization: AdamW with linear warmup
+Hardware: Trained on NVIDIA GPU with mixed precision
 
-# 4  Run the notebook step‑by‑step
- jupyter notebook ocr.ipynb
-```
+Key Innovations
 
-> **Note**  Set `data_root` inside the notebook to your dataset path.
+Gradual Augmentation: Starts with light augmentations, progressively introduces harder ones
+Smart Callbacks: Early stopping, model checkpointing, and custom augmentation scheduling
+Efficient Training: Gradient checkpointing and mixed precision for memory efficiency
 
----
+🔧 Tech Stack
+ComponentTechnologyPurposeCore FrameworkPyTorch 2.0+Deep learning foundationTrainingPyTorch LightningClean training loops, loggingModel ArchitectureDonut (NAVER)State-of-the-art document OCRData AugmentationAlbumentationsFast, flexible augmentationsTokenizationSentencePieceSubword tokenizationClassificationBART (Facebook)Zero-shot classificationInterfaceGradioWeb applicationModel HostingHugging Face HubModel distribution
+📁 Project Structure
+medical-prescription-ocr/
+├── app.py                  # Gradio web application
+├── model_download.py       # Model download utility
+├── OCR_training.ipynb      # Complete training pipeline
+├── requirements.txt        # Python dependencies
+├── LICENSE                 # MIT License
+├── README.md              # This file
+└── model/                 # Downloaded model files (after setup)
+    ├── config.json
+    ├── model.safetensors
+    ├── tokenizer.json
+    └── ...
+🤝 Contributing
+Contributions are welcome! Here's how you can help:
 
-## 📌 Code Structure
-1. **Hyper‑parameters** (learning rate, epochs, batch_size…) live at the top of `ocr.ipynb`.  
-2. **Data Module** (`PrescriptionDataModule`) – handles splits & augmentations (gradual strategy).  
-3. **Model Module** (`PrescriptionOCRModule`) – wraps Donut, enables gradient checkpointing, logs losses.  
-4. **Callbacks** – `ModelCheckpoint`, `EarlyStopping`, and a custom `GradualAugmentationCallback`.  
-5. **Evaluation** – accuracy metrics + sample visualisations.
+🐛 Report Bugs: Open an issue with details
+💡 Suggest Features: Share your ideas in discussions
+🔧 Submit PRs: Fork, create a feature branch, and submit a pull request
 
----
+Development Setup
+bash# Clone your fork
+git clone https://github.com/YOUR_USERNAME/medical-prescription-ocr.git
 
-## 🏆 Baseline Results
-| Metric | Value* |
-|---|---|
-| Character‑level Accuracy | ~71 % |
-| Word‑level Accuracy | ~84 % |
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-*Numbers reported on an internal set of 200 test prescriptions; expect variation by dataset.
+# Install dev dependencies
+pip install -r requirements.txt
+pip install jupyter black pytest
+⚠️ Important Notes
 
----
+Research Use Only: This model is NOT validated for clinical use
+Synthetic Data: Trained on synthetic prescriptions, not real patient data
+No Medical Advice: Should not be used for actual medical prescription processing
+Privacy: Never upload real patient prescriptions to the demo
 
-## 🤖 Why These Libraries?
-* **PyTorch Lightning** – clean training loops, fewer bugs.  
-* **Donut** – state‑of‑the‑art for document OCR without heavy detectors.  
-* **Albumentations** – high‑quality augmentations with speed.  
-* **SentencePiece** – efficient tokenisation for mixed handwriting/typed text.
+📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
+🙏 Acknowledgments
 
----
+NAVER Clova AI - For the amazing Donut architecture
+Hugging Face - For model and dataset hosting
+Facebook Research - For BART zero-shot classifier
+IAM Handwriting Database - Inspiration for dataset structure
 
-## 🎯 Planned Improvements
-* Self‑supervised pre‑training on unlabeled prescription scans.
-* Context‑aware spell‑correction using FDA drug dictionary.
-* Lightweight model distillation for mobile inference.
-* Larger, more diverse dataset (different scripts & languages).
+👤 Author
+Chinmay Shrivastava
 
----
-
-## 🙋‍♂️ Author
-Chinmay Shrivastava – MS CSE, self‑taught ML engineer passionate about AI.
-
-> *Feel free to create an issue or submit a PR if you’d like to contribute!*
+MS Computer Science & Engineering
+AI/ML Engineer passionate about healthcare applications
+GitHub: @chinmays18
+Hugging Face: @chinmays18
