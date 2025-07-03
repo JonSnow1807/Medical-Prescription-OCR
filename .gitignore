@@ -1,0 +1,43 @@
+# Model files - too large for GitHub
+model/
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.whl
+
+# Dataset files - hosted on Hugging Face
+dataset_splits/
+data/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.egg-info/
+
+# Environment
+venv/
+env/
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.bak
+temp/
+temp_upload/
+DATASET_README.md
+medical_prescription_dataset.py
+upload_model.py
+README_hf.md
+MODEL_README_UPDATED.md
+dataset_info.json
