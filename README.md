@@ -88,6 +88,7 @@ python model_download.py
 # 4 – Launch the Gradio app
 python app.py
 
+```
 
 The app will be available at **http://localhost:7860**.
 
@@ -128,6 +129,8 @@ generated_ids = model.generate(
 # Decode
 text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
 print(text)
+
+```
 
 ### Advanced – with zero-shot verification
 `app.py` demonstrates automatic **zero-shot classification** (BART-based) to verify an image is a prescription before running OCR.
@@ -198,6 +201,8 @@ medical-prescription-ocr/
     ├── tokenizer.json
     └── …
 
+```
+
 ## 🤝 Contributing
 
 We welcome contributions!
@@ -221,6 +226,7 @@ pip install -r requirements.txt
 # Dev tools
 pip install black pytest jupyter
 
+```
 
 Before committing, run `black .` for formatting and ensure all tests pass with `pytest`.
 
