@@ -31,7 +31,7 @@ A transformer-based Optical Character Recognition (OCR) system for handwritten m
 
 ## 🚀 Overview
 
-**Medical Prescription OCR** (formerly **RxReader**) converts doctors’ handwritten prescriptions into structured, machine-readable text with high accuracy.
+**Medical Prescription OCR** (formerly **RxReader**) converts doctors' handwritten prescriptions into structured, machine-readable text with high accuracy.
 
 ### Key Capabilities
 - **Accurate OCR** – Transcribes drug names, dosages, frequencies and instructions  
@@ -46,7 +46,7 @@ A transformer-based Optical Character Recognition (OCR) system for handwritten m
 | Feature | Description |
 |---------|-------------|
 | 🤖 **Pre-trained Model** | Ready to use on the [HF Model Hub](https://huggingface.co/chinmays18/medical-prescription-ocr) |
-| 📊 **Comprehensive Dataset** | 1 000 synthetic, fully annotated images on [HF Datasets](https://huggingface.co/datasets/chinmays18/medical-prescription-dataset) |
+| 📊 **Comprehensive Dataset** | 1,000 synthetic, fully annotated images on [HF Datasets](https://huggingface.co/datasets/chinmays18/medical-prescription-dataset) |
 | 🖥️ **User-Friendly Interface** | Gradio web app for drag-and-drop testing |
 | 🔄 **Gradual Augmentation** | Curriculum strategy for robust learning |
 | 📈 **Production Ready** | Download script and deployment guide included |
@@ -57,9 +57,9 @@ A transformer-based Optical Character Recognition (OCR) system for handwritten m
 
 | Metric | Score | Notes |
 |--------|-------|-------|
-| **Character-level accuracy** | **71 %** | Individual character recognition |
-| **Word-level accuracy** | **84 %** | Complete word recognition |
-| **Processing speed** | **≈ 2 s/img** | CPU – Apple M1 |
+| **Character-level accuracy** | **71%** | Individual character recognition |
+| **Word-level accuracy** | **84%** | Complete word recognition |
+| **Processing speed** | **≈2s/img** | CPU – Apple M1 |
 
 *Benchmarked on 100 held-out prescriptions with varied handwriting.*
 
@@ -88,6 +88,7 @@ python model_download.py
 # 4 – Launch the Gradio app
 python app.py
 
+
 The app will be available at **http://localhost:7860**.
 
 ---
@@ -103,7 +104,7 @@ import torch
 
 # Load model & processor
 processor = DonutProcessor.from_pretrained("chinmays18/medical-prescription-ocr")
-model     = VisionEncoderDecoderModel.from_pretrained("chinmays18/medical-prescription-ocr")
+model = VisionEncoderDecoderModel.from_pretrained("chinmays18/medical-prescription-ocr")
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
@@ -113,7 +114,7 @@ image = Image.open("prescription.jpg").convert("RGB")
 pixel_values = processor(images=image, return_tensors="pt").pixel_values.to(device)
 
 # Generate text
-task_prompt       = "<s_ocr>"
+task_prompt = "<s_ocr>"
 decoder_input_ids = processor.tokenizer(task_prompt, return_tensors="pt").input_ids.to(device)
 
 generated_ids = model.generate(
@@ -128,7 +129,7 @@ generated_ids = model.generate(
 text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
 print(text)
 
-### Advanced – with zero-shot verification  
+### Advanced – with zero-shot verification
 `app.py` demonstrates automatic **zero-shot classification** (BART-based) to verify an image is a prescription before running OCR.
 
 ---
@@ -141,51 +142,45 @@ print(text)
 | Val   | 100 |
 | Test  | 100 |
 
-*1 000 synthetic PNG images + JSON annotations.*
+*1,000 synthetic PNG images + JSON annotations.*
 
-
-
-
-Access the complete dataset on Hugging Face: **chinmays18/medical-prescription-dataset**
+Access the complete dataset on Hugging Face: **[chinmays18/medical-prescription-dataset](https://huggingface.co/datasets/chinmays18/medical-prescription-dataset)**
 
 ---
 
 ## 🛠️ Training
 
-The full training workflow is documented in **`notebooks/OCR_training.ipynb`**.
+The full training workflow is documented in `OCR_training.ipynb`.
 
-| Aspect            | Details                               |
-|-------------------|---------------------------------------|
-| **Base model**    | NAVER Clova Donut                     |
-| **Framework**     | PyTorch Lightning                     |
-| **Optimizer**     | AdamW with linear warm-up             |
-| **Strategy**      | Gradual augmentation curriculum       |
-| **Hardware**      | NVIDIA GPU (mixed precision)          |
+| Aspect | Details |
+|--------|---------|
+| **Base model** | NAVER Clova Donut |
+| **Framework** | PyTorch Lightning |
+| **Optimizer** | AdamW with linear warm-up |
+| **Strategy** | Gradual augmentation curriculum |
+| **Hardware** | NVIDIA GPU (mixed precision) |
 
 ### Key Innovations
-* **Gradual Augmentation** – Starts with light distortions and progressively increases difficulty  
-* **Smart Callbacks** – Early stopping, checkpointing, and custom schedulers  
+* **Gradual Augmentation** – Starts with light distortions and progressively increases difficulty
+* **Smart Callbacks** – Early stopping, checkpointing, and custom schedulers
 * **Memory Efficiency** – Gradient checkpointing & automatic mixed precision
 
-
 ---
 
-## ️🏗 Tech Stack
+## 🏗️ Tech Stack
 
-| Component      | Technology            | Purpose                                   |
-|----------------|-----------------------|-------------------------------------------|
-| Core Framework | **PyTorch 2**         | Deep-learning foundation                  |
-| Training       | **PyTorch Lightning** | Clean, reproducible loops & logging       |
-| Model Arch.    | **Donut** (NAVER)     | Document-level OCR                        |
-| Tokenization   | **SentencePiece**     | Sub-word encoding                         |
-| Augmentation   | **Albumentations**    | Fast, flexible image transforms           |
-| Classification | **BART** (Meta AI)    | Zero-shot document-type detection         |
-| Interface      | **Gradio**            | Web demo                                  |
-| Hosting        | **Hugging Face Hub**  | Model & dataset distribution              |
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| Core Framework | **PyTorch 2** | Deep-learning foundation |
+| Training | **PyTorch Lightning** | Clean, reproducible loops & logging |
+| Model Arch. | **Donut** (NAVER) | Document-level OCR |
+| Tokenization | **SentencePiece** | Sub-word encoding |
+| Augmentation | **Albumentations** | Fast, flexible image transforms |
+| Classification | **BART** (Meta AI) | Zero-shot document-type detection |
+| Interface | **Gradio** | Web demo |
+| Hosting | **Hugging Face Hub** | Model & dataset distribution |
 
 ---
-
-## 📁 Project Structure
 
 ## 📁 Project Structure
 
@@ -203,18 +198,15 @@ medical-prescription-ocr/
     ├── tokenizer.json
     └── …
 
-
----
-
 ## 🤝 Contributing
 
 We welcome contributions!
 
-1. **Report a bug** – Open an issue with clear reproduction steps.  
-2. **Suggest a feature** – Start a discussion describing the use-case.  
+1. **Report a bug** – Open an issue with clear reproduction steps.
+2. **Suggest a feature** – Start a discussion describing the use-case.
 3. **Submit a PR** – Fork, create a feature branch, commit, and open a pull request.
 
-~~~bash
+```bash
 # Fork & clone
 git clone https://github.com/YOUR_USERNAME/medical-prescription-ocr.git
 cd medical-prescription-ocr
@@ -228,7 +220,7 @@ pip install -r requirements.txt
 
 # Dev tools
 pip install black pytest jupyter
-~~~
+
 
 Before committing, run `black .` for formatting and ensure all tests pass with `pytest`.
 
@@ -236,10 +228,10 @@ Before committing, run `black .` for formatting and ensure all tests pass with `
 
 ## ⚠️ Important Notes
 
-* **Research use only** – The model is **not** validated for clinical workflows.  
-* **Synthetic data** – Trained entirely on generated prescriptions, *not* real patient data.  
-* **No medical advice** – Do **not** use this model to process real prescriptions.  
-* **Privacy** – Never upload confidential patient prescriptions to the public demo.  
+* **Research use only** – The model is **not** validated for clinical workflows.
+* **Synthetic data** – Trained entirely on generated prescriptions, *not* real patient data.
+* **No medical advice** – Do **not** use this model to process real prescriptions.
+* **Privacy** – Never upload confidential patient prescriptions to the public demo.
 
 ---
 
@@ -252,10 +244,10 @@ See the full text in the [`LICENSE`](LICENSE) file.
 
 ## 🙏 Acknowledgments
 
-* **NAVER Clova AI** – Donut architecture  
-* **Hugging Face** – Model & dataset hosting  
-* **Meta AI** – BART zero-shot classifier  
-* **IAM Handwriting DB** – Inspiration for annotation schema  
+* **[NAVER Clova AI](https://github.com/clovaai/donut)** – Donut architecture
+* **[Hugging Face](https://huggingface.co/)** – Model & dataset hosting
+* **[Meta AI](https://github.com/facebookresearch/fairseq)** – BART zero-shot classifier
+* **[IAM Handwriting DB](http://www.fki.inf.unibe.ch/databases/iam-handwriting-database)** – Inspiration for annotation schema
 
 ---
 
@@ -263,14 +255,13 @@ See the full text in the [`LICENSE`](LICENSE) file.
 
 **Chinmay Shrivastava**  
 M.S. Computer Science & Engineering  
-AI/ML Engineer passionate about healthcare applications  
+AI/ML Engineer passionate about healthcare applications
 
-* GitHub — [@JonSnow1807](https://github.com/JonSnow1807)  
-* Hugging Face — [@chinmays18](https://huggingface.co/chinmays18)  
+* GitHub — [@JonSnow1807](https://github.com/JonSnow1807)
+* Hugging Face — [@chinmays18](https://huggingface.co/chinmays18)
 
 <div align="center">
 
 ⭐&nbsp;&nbsp;If you find this project helpful, please consider giving it a **star**!&nbsp;&nbsp;⭐
 
 </div>
-
